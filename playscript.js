@@ -276,9 +276,6 @@ function openModList(targ)
 		if (!alreadyOpen)
 		{
 			var attributes = {
-				mafia: 'Mafia Chat',
-				coven: 'Coven Chat',
-				vamp: 'Vampire Chat',
 				linked: 'Linked',
 				jailor: 'Jailor',
 				mayor: 'Mayor',
@@ -288,8 +285,6 @@ function openModList(targ)
 				wisteria: 'Wisteria',
 				gardenia: 'Gardenia',
 				klepto: 'Name Hidden',
-				positive: 'Positive Chat',
-				negative: 'Negative Chat',
 			};
 			var actions = {
 				'Douse': function () {

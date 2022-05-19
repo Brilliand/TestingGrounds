@@ -30,13 +30,6 @@ var commandList = {
 		music: 'Tells you what music each phase is set to. Usage: /music',
 		tmk: 'Describes what Tactical Mafia Killing does. Usage: /tmk',
 	},
-	roles: {
-		reveal: 'Reveal yourself as the Mayor, if you have that role. Usage: /reveal, during the day.',
-		jail: 'Choose to jail a player. Usage: /jail [target] during the day.',
-		execute: 'Choose to execute the person you have jailed. Usage /execute, then /execute again to cancel.',
-		seance: 'Choose a player to talk to at night. You may only use this once during the day.',
-		unveil: 'Unveil yourself as the Gardenia, if you have that role. Usage: /unveil, during the day.'
-	},
 	mod: {
 		givemod: 'Pass the mod onto another person. Usage: /givemod name',
 		a: 'Send a public message to everyone (outside of Pregame). Usage: /a message',
@@ -1132,72 +1125,55 @@ io.on('connection', function (socket, req) {
 						switch (chat) {
 							case 'jailor':
 								addLogMessage(Type.SYSTEM, player.name+' is now the jailor.');
-								notify = 'You are now the Jailor. Use /jail [target] to jail. Use /execute, /exe or /x to execute your prisoner.';
 								break;
 							case 'jailed':
-								notify = undefined;
 								break; //No message
 							case 'wisteria':
 								addLogMessage(Type.SYSTEM, player.name+' is now the Wisteria.');
-								notify = 'You are now Wisteria. Use /entangle [target] to capture. Use /execute, /exe or /x to execute your prisoner.';
 								break;
 							case 'entangled':
-								notify = undefined;
 								break; //No message
 							case 'linked':
 								players[mod].s.sendMessage(Type.SYSTEM, player.name + ' is now linked.');
 								break;
 							case 'medium':
 								addLogMessage(Type.SYSTEM, player.name+' can now hear the dead at night.');
-								notify = 'You can now hear the dead at night.';
 								player.canSeance = true;
 								player.seance = undefined;
 								break;
 							case 'klepto':
 								addLogMessage(Type.SYSTEM, player.name+' will have their name hidden in factional chats.');
-								notify = 'Your name is now hidden in factional chats.';
 								break;
 							default:
 								addLogMessage(Type.SYSTEM, player.name+' can now talk in the ' + chat + ' chat.');
-								notify = 'You can now talk in the ' + chat + ' chat.';
 								break;
 						}
 					} else {
 						switch (chat) {
 							case 'jailor':
 								addLogMessage(Type.SYSTEM, player.name+' is no longer the jailor.');
-								notify = 'You are no longer the Jailor.';
 								break;
 							case 'jailed':
-								notify = undefined;
 								break; //No message
 							case 'wisteria':
 								addLogMessage(Type.SYSTEM, player.name+' is no longer Wisteria.');
-								notify = 'You are no longer Wisteria.';
 								break;
 							case 'entangled':
-								notify = undefined;
 								break; //No message
 							case 'linked':
 								players[mod].s.sendMessage(Type.SYSTEM, player.name + ' is no longer linked.');
 								break;
 							case 'medium':
 								addLogMessage(Type.SYSTEM, player.name+' can no longer hear the dead at night.');
-								notify = 'You can no longer hear the dead at night.';
 								player.canSeance = false;
 								break;
 							case 'klepto':
 								addLogMessage(Type.SYSTEM, player.name+' will no longer have their name hidden in factional chats.');
-								notify = 'Your name is no longer hidden in factional chats.';
 								break;
 							default:
 								addLogMessage(Type.SYSTEM, player.name+' can no longer talk in the ' + chat + ' chat.');
-								notify = 'You can no longer talk in the ' + chat + ' chat.';
 								break;
 						}
-					}
-					if (!players[socket.id].silenced) {
-						if (notify) player.s.sendMessage(Type.SYSTEM, notify);
 					}
 					players[mod].s.sendMessage(Type.TOGGLE, player.name, chat, player.chats[chat]);
 				} else {
@@ -1206,16 +1182,10 @@ io.on('connection', function (socket, req) {
 							if (player.mayor === undefined) {
 								player.mayor = false; //False, meaning not revealed.
 								addLogMessage(Type.SYSTEM, player.name+' is now the Mayor.');
-								if (!players[socket.id].silenced) {
-									player.s.sendMessage(Type.SYSTEM, 'You are now the Mayor. Use /reveal to reveal yourself and get 3 votes.');
-								}
 								players[mod].s.sendMessage(Type.TOGGLE, player.name, chat, true);
 							} else {
 								player.mayor = undefined; //Undefined, meaning not mayor.
 								addLogMessage(Type.SYSTEM, player.name+' is no longer the Mayor.');
-								if (!players[socket.id].silenced) {
-									player.s.sendMessage(Type.SYSTEM, 'You are no longer the Mayor.');
-								}
 								players[mod].s.sendMessage(Type.TOGGLE, player.name, chat, false);
 							}
 							break;
@@ -1224,31 +1194,16 @@ io.on('connection', function (socket, req) {
 							if (player.gardenia === undefined) {
 								player.gardenia = false; //False, meaning not revealed.
 								addLogMessage(Type.SYSTEM, player.name+' is now the gardenia.');
-								if (!players[socket.id].silenced) {
-									player.s.sendMessage(Type.SYSTEM, 'You are now the Gardenia. Use /unveil to reveal yourself and get 3 votes.');
-								}
 								players[mod].s.sendMessage(Type.TOGGLE, player.name, chat, true);
 							} else {
 								player.gardenia = undefined; //Undefined, meaning not gardenia.
 								addLogMessage(Type.SYSTEM, player.name+' is no longer the Gardenia.');
-								if (!players[socket.id].silenced) {
-									player.s.sendMessage(Type.SYSTEM, 'You are no longer the Gardenia.');
-								}
 								players[mod].s.sendMessage(Type.TOGGLE, player.name, chat, false);
 							}
 							break;
 							break;
 						case 'blackmailer':
 							player.hearwhispers = state;
-							if (!players[socket.id].silenced) {
-								if (player.hearwhispers) {
-									addLogMessage(Type.SYSTEM, player.name+' can now hear whispers.');
-									player.s.sendMessage(Type.SYSTEM, 'You can now hear whispers.');
-								} else {
-									addLogMessage(Type.SYSTEM, player.name+' can no longer hear whispers.');
-									player.s.sendMessage(Type.SYSTEM, 'You can no longer hear whispers.');
-								}
-							}
 							players[mod].s.sendMessage(Type.TOGGLE, player.name, chat, player.hearwhispers);
 							break;
 						case 'blackmail':
@@ -1402,6 +1357,8 @@ function setPhase(p) {
 	var oldphase = phase;
 	phase = p;
 	if(phase > Phase.ROLES && (oldphase == Phase.ROLES || gamelog.length === 0)) {
+		//Record which gamemode is active
+		addLogMessage(Type.HIGHLIGHT, 'Amnesia Gamemode');
 		//Leave a record of what players are in the game
 		if (createdList && createdList.length != 0) {
 			addLogMessage(Type.SHOWLIST, createdList.map(function(roleslot) {
@@ -1478,13 +1435,6 @@ function setPhase(p) {
 			var n = gm.getDay();
 			if (n == 2 || n >= 4) {
 				players[i].s.sendMessage(Type.PRENOT, 'FULLMOON');
-			}
-			if ((n == 2 || n >= 4) && players[i].role.toLowerCase() == 'werewolf') {
-				//Even number, full moon
-				if (players[i] == players[mod]) {
-				} else {
-					players[i].s.sendMessage(Type.HIGHLIGHT, 'The light of the full moon has transformed you into a rampaging Werewolf!', 'dying');
-				}
 			}
 			if (players[i].chats.linked) {
 				addLogMessage(Type.SYSTEM, players[i].name + ' has been linked!');
@@ -1669,6 +1619,23 @@ function getPlayerTargetingOptions(player) {
 			entangled: p.chats.entangled,
 			target: p === player.goal_target,
 		};
+		if(params.other) {
+			// Hide information about other players' factions
+			Object.assign(params, {
+				town: true,
+				nontown: true,
+				mafia: true,
+				nonmafia: true,
+				coven: true,
+				noncoven: true,
+				vampire: true,
+				nonvampire: true,
+				positive: true,
+				nonpositive: true,
+				negative: true,
+				nonnegative: true,
+			});
+		}
 		return {
 			name: p.name,
 			params: params,
@@ -2049,18 +2016,10 @@ function Player(socket, name, ip) {
 			if (role.length == 0) {
 				this.role = 'NoRole';
 				this.s.sendMessage(Type.System, 'Your role has been removed.');
-			} else if (roles.hasRolecard(role)) {
-				var rolecard = roles.getRoleCard(role, {});
-				this.s.sendMessage(Type.ROLECARD, rolecard);
-				this.s.sendMessage(Type.ROLERESULTS, 'Your role is ' + sanitize(role));
 			} else {
-				this.s.sendMessage(Type.ROLERESULTS, 'Your role is ' + sanitize(role));
+				this.s.sendMessage(Type.ROLERESULTS, 'You have received a role.');
 			}
 			addLogMessage(Type.SYSTEM, this.name+'&#39;s role is now ' + sanitize(role));
-			this.s.sendMessage(Type.SETROLE, {
-				role: this.role,
-				rolecolor: roles.getRoleData(this.role).color,
-			});
 			//Inform the player of their new targeting options
 			sendPlayerTargetingOptions(this);
 		},
@@ -2323,74 +2282,6 @@ function Player(socket, name, ip) {
 						}
 					} else {
 						this.s.sendMessage(Type.SYSTEM, 'You can only whisper during the day.');
-					}
-					break;
-				case 'seance':
-					if (mod == this.s.id) {
-						this.s.sendMessage(Type.SYSTEM, 'The mod cannot use this command.');
-					} else if (this.chats.medium) {
-						if (this.canSeance) {
-							if (!this.alive) {
-								if ((phase >= Phase.DAY && phase <= Phase.LASTWORDS) || phase == Phase.FIRSTDAY || phase == Phase.MODTIME) {
-									if (this.seance === undefined) {
-										var seance = function (medium, target) {
-											if (target.name == medium.name) {
-												medium.s.sendMessage(Type.SYSTEM, 'You cannot seance yourself.');
-											} else if (!target.alive) {
-												medium.s.sendMessage(Type.SYSTEM, 'You cannot seance a dead person.');
-											} else if (mod == target.s.id) {
-												if (medium.seancing) {
-													medium.s.sendMessage(Type.SYSTEM, 'You cancel your seance.');
-													medium.seancing = undefined;
-													addLogMessage(Type.SYSTEM, medium.name + ' cancels their seance.');
-													players[mod].s.sendMessage(Type.SYSTEM, medium.name + ' cancels their seance.');
-												} else {
-													medium.s.sendMessage(Type.SYSTEM, 'You are not targetting anyone.');
-												}
-											} else if (medium.seancing && medium.seancing == target) {
-												medium.s.sendMessage(Type.SYSTEM, 'You cancel your seance.');
-												medium.seancing = undefined;
-												addLogMessage(Type.SYSTEM, medium.name + ' cancels their seance.');
-												players[mod].s.sendMessage(Type.SYSTEM, medium.name + ' cancels their seance.');
-											} else {
-												medium.s.sendMessage(Type.SYSTEM, 'You are now seancing ' + target.name + '.');
-												medium.seancing = target;
-												addLogMessage(Type.SYSTEM, medium.name + ' is now seancing ' + target.name + '.');
-												players[mod].s.sendMessage(Type.SYSTEM, medium.name + ' is now seancing ' + target.name + '.');
-												for (i in players) {
-													if (players[i].spectate) {
-														players[i].s.sendMessage(Type.SYSTEM, medium.name + ' is now seancing ' + target.name + '.');
-													}
-												}
-											}
-										};
-										if (playernames[c[1]]) {
-											seance(this, players[playernames[c[1]]]);
-										} else if (!isNaN(c[1])) {
-											//Get the numbered player.
-											var target = getPlayerByNumber(c[1]);
-											if (target != -1) {
-												seance(this, target);
-											} else {
-												this.s.sendMessage(Type.SYSTEM, 'Could not find player number ' + sanitize(c[1]) + '!');
-											}
-										} else {
-											this.s.sendMessage(Type.SYSTEM, sanitize(c[1]) + ' is not a valid player.');
-										}
-									} else {
-										this.s.sendMessage(Type.HIGHLIGT, 'You have 0 seances left.', 'information');
-									}
-								} else {
-									this.s.sendMessage(Type.SYSTEM, 'You can only use this command during the day.');
-								}
-							} else {
-								this.s.sendMessage(Type.SYSTEM, 'You need to be dead to seance.');
-							}
-						} else {
-							this.s.sendMessage(Type.HIGHLIGT, 'You have 0 seances left.', 'information');
-						}
-					} else {
-						this.s.sendMessage(Type.SYSTEM, 'Only a Medium can seance.');
 					}
 					break;
 				case 'clean':
@@ -2832,159 +2723,6 @@ function Player(socket, name, ip) {
 						socket.sendMessage(Type.SYSTEM, "The syntax of this command is '/dev password'.");
 					}
 					break;
-				case 'reveal':
-					if (this.mayor === undefined) {
-						this.s.sendMessage(Type.SYSTEM, "...but you aren't the Mayor.");
-					} else if (this.mayor) {
-						this.s.sendMessage(Type.SYSTEM, 'You have already revealed yourself as the Mayor.');
-					} else if (!this.alive) {
-						this.s.sendMessage(Type.SYSTEM, 'You must be alive to reveal.');
-					} else if ((phase >= Phase.DAY && phase <= Phase.LASTWORDS) || phase == Phase.FIRSTDAY) {
-						sendPublicMessage(Type.MAYOR, this.name);
-						this.mayor = true;
-						if (this.votingFor) {
-							players[this.votingFor].votes += 2;
-							trialCheck(players[this.votingFor]);
-						}
-					} else {
-						this.s.sendMessage(Type.SYSTEM, 'You can only reveal as the Mayor during the day.');
-					}
-					break;
-				case 'unveil':
-					if (this.gardenia === undefined) {
-						this.s.sendMessage(Type.SYSTEM, "...but you aren't the Gardenia.");
-					} else if (this.gardenia) {
-						this.s.sendMessage(Type.SYSTEM, 'You have already unveiled yourself as the Gardenia.');
-					} else if (!this.alive) {
-						this.s.sendMessage(Type.SYSTEM, 'You must be alive to unveil.');
-					} else if ((phase >= Phase.DAY && phase <= Phase.LASTWORDS) || phase == Phase.FIRSTDAY) {
-						sendPublicMessage(Type.GARDENIA, this.name);
-						this.gardenia = true;
-						if (this.votingFor) {
-							players[this.votingFor].votes += 2;
-							trialCheck(players[this.votingFor]);
-						}
-					} else {
-						this.s.sendMessage(Type.SYSTEM, 'You can only unveil as the Gardenia during the day.');
-					}
-					break;
-				case 'jail':
-					if (mod == this.s.id) {
-						this.s.sendMessage(Type.SYSTEM, 'The mod cannot use this command.');
-					} else if (!this.chats.jailor) {
-						this.s.sendMessage(Type.SYSTEM, 'Only the Jailor can detain people.');
-					} else if (!this.alive) {
-						this.s.sendMessage(Type.SYSTEM, 'You must be alive to jail.');
-					} else if ((phase >= Phase.DAY && phase <= Phase.LASTWORDS) || phase == Phase.FIRSTDAY) {
-						var args = c.slice(1, c.length);
-						var targets = [];
-						var error = false;
-						if (args.length == 0 || args[0] == '0') {
-							var actions = gm.getActions(this.name);
-							if (actions && actions.length > 0) {
-								//This is a cancel
-							} else {
-								error = true;
-								this.s.sendMessage(Type.SYSTEM, 'You are not targetting anyone.');
-							}
-						} else {
-							//Check if the targetting is valid
-							var vt = gm.validTarget(args, this.role.toLowerCase(), players, playernames, playernums, this, phase);
-							if (vt == 'notfound' || vt == 'ok' || free) {
-								for (i in args) {
-									if (args[i] != '') {
-										if (isNaN(args[i])) {
-											var p = getPlayerByName(args[i]);
-										} else {
-											var p = getPlayerByNumber(parseInt(args[i]));
-										}
-										if (p && p != -1) {
-											if (p.s.id != mod) {
-												targets.push(p.name);
-											} else {
-												this.s.sendMessage(Type.SYSTEM, 'You cannot jail the mod.');
-												error = true;
-												break;
-											}
-										} else {
-											this.s.sendMessage(Type.SYSTEM, 'Invalid player: ' + sanitize(args[i]));
-											error = true;
-											break;
-										}
-									}
-								}
-							} else {
-								error = true;
-								var message = vt;
-								this.s.sendMessage(Type.SYSTEM, message);
-							}
-						}
-						if (!error) {
-							this.target(targets);
-						}
-					} else {
-						this.s.sendMessage(Type.SYSTEM, 'You can only jail during the day.');
-					}
-					break;
-				case 'entangle':
-				case 'ent':
-					if (mod == this.s.id) {
-						this.s.sendMessage(Type.SYSTEM, 'The mod cannot use this command.');
-					} else if (!this.chats.wisteria) {
-						this.s.sendMessage(Type.SYSTEM, 'Only Wisteria can entwine people.');
-					} else if (!this.alive) {
-						this.s.sendMessage(Type.SYSTEM, 'You must be alive to entangle.');
-					} else if ((phase >= Phase.DAY && phase <= Phase.LASTWORDS) || phase == Phase.FIRSTDAY) {
-						var args = c.slice(1, c.length);
-						var targets = [];
-						var error = false;
-						if (args.length == 0 || args[0] == '0') {
-							var actions = gm.getActions(this.name);
-							if (actions && actions.length > 0) {
-								//This is a cancel
-							} else {
-								error = true;
-								this.s.sendMessage(Type.SYSTEM, 'You are not targetting anyone.');
-							}
-						} else {
-							//Check if the targetting is valid
-							var vt = gm.validTarget(args, this.role.toLowerCase(), players, playernames, playernums, this, phase);
-							if (vt == 'notfound' || vt == 'ok' || free) {
-								for (i in args) {
-									if (args[i] != '') {
-										if (isNaN(args[i])) {
-											var p = getPlayerByName(args[i]);
-										} else {
-											var p = getPlayerByNumber(parseInt(args[i]));
-										}
-										if (p && p != -1) {
-											if (p.s.id != mod) {
-												targets.push(p.name);
-											} else {
-												this.s.sendMessage(Type.SYSTEM, 'You cannot entangle the mod.');
-												error = true;
-												break;
-											}
-										} else {
-											this.s.sendMessage(Type.SYSTEM, 'Invalid player: ' + sanitize(args[i]));
-											error = true;
-											break;
-										}
-									}
-								}
-							} else {
-								error = true;
-								var message = vt;
-								this.s.sendMessage(Type.SYSTEM, message);
-							}
-						}
-						if (!error) {
-							this.target(targets);
-						}
-					} else {
-						this.s.sendMessage(Type.SYSTEM, 'You can only entangle during the day.');
-					}
-					break;
 				case 't':
 				case 'target':
 				case 'freetarget':
@@ -3079,11 +2817,21 @@ function Player(socket, name, ip) {
 									oldtarget.s.sendMessage(Type.HIGHLIGHT, 'Wisteria has changed their mind.');
 								}
 							}
-							if(this.mayor === false && newtarget === this && is_day) {
-								this.command('reveal');
+							if(this.mayor === false && newtarget === this && this.alive && is_day) {
+								sendPublicMessage(Type.MAYOR, this.name);
+								this.mayor = true;
+								if (this.votingFor) {
+									players[this.votingFor].votes += 2;
+									trialCheck(players[this.votingFor]);
+								}
 							}
-							if(this.gardenia === false && newtarget === this && is_day) {
-								this.command('unveil');
+							if(this.gardenia === false && newtarget === this && this.alive && is_day) {
+								sendPublicMessage(Type.GARDENIA, this.name);
+								this.gardenia = true;
+								if (this.votingFor) {
+									players[this.votingFor].votes += 2;
+									trialCheck(players[this.votingFor]);
+								}
 							}
 							if(this.chats.medium && this.canSeance && !this.alive && is_day) {
 								if(newtarget && newtarget !== this && newtarget.alive) {
@@ -3107,48 +2855,6 @@ function Player(socket, name, ip) {
 								}
 							}
 							this.target(targets);
-						}
-					}
-					break;
-				case 'exe':
-				case 'execute':
-				case 'x':
-					var n = gm.getDay();
-					if (!this.chats.jailor) {
-						this.s.sendMessage(Type.SYSTEM, 'You need to be the Jailor to use this.');
-					} else if (phase != Phase.NIGHT) {
-						this.s.sendMessage(Type.SYSTEM, 'You can only use this at night.');
-					} else if (n == 1) {
-						this.s.sendMessage(Type.SYSTEM, "You can't execute your target Night 1!");
-					} else {
-						var modjailed = false;
-						var found = false;
-						var msg = this.executing ? 'The Jailor has changed his mind.' : 'The Jailor has decided to execute you.';
-						var jmsg = this.executing ? 'You have changed your mind.' : 'You have decided to execute your prisoner.';
-						for (i in players) {
-							if (players[i].chats.jailed) {
-								if (i == mod) {
-									modjailed = true;
-								} else {
-									found = players[i].name;
-									players[i].s.sendMessage(Type.SYSTEM, msg);
-									socket.sendMessage(Type.SYSTEM, jmsg);
-									addLogMessage(Type.SYSTEM, this.executing ? this.name + ' has changed his mind.' : this.name + ' has decided to execute ' + players[i].name + '.');
-									players[mod].s.sendMessage(Type.SYSTEM, this.executing ? this.name + ' has changed his mind.' : this.name + ' has decided to execute ' + players[i].name + '.');
-								}
-							}
-						}
-						if (modjailed) {
-							this.s.sendMessage(Type.SYSTEM, 'You cannot execute the mod.');
-						} else if (found) {
-							this.executing = !this.executing;
-							if (this.executing) {
-								gm.log(this.name, [found]);
-							} else {
-								gm.log(this.name, []);
-							}
-						} else {
-							this.s.sendMessage(Type.SYSTEM, 'You do not have anyone to execute!');
 						}
 					}
 					break;
@@ -3204,19 +2910,8 @@ function Player(socket, name, ip) {
 						//Return own role.
 						if (this.role == 'NoRole') {
 							this.s.sendMessage(Type.SYSTEM, 'You were not assigned a role, yet.');
-						} else if (roles.hasRolecard(this.role)) {
-							var results = {};
-							var investGroup = gm.getRoleGroup(this.role.toLowerCase());
-							if (investGroup) {
-								results.investResult = gm.getInvestFlavor(investGroup) + ' They must be a ' + gm.grammarList(gm.getInvestGroupings(investGroup), 'or');
-							}
-							var sheriffAlignment = gm.getAlignment(this.role.toLowerCase());
-							if (sheriffAlignment) {
-								results.sheriffResult = gm.getSheriffResult(sheriffAlignment);
-							}
-							this.s.sendMessage(Type.ROLECARD, roles.getRoleCard(this.role, results));
 						} else {
-							this.s.sendMessage(Type.SYSTEM, 'Your role is ' + sanitize(this.role) + '.');
+							this.s.sendMessage(Type.SYSTEM, 'You have a role, but since this is Amnesia Gamemode, you don\'t know what it is.');
 						}
 					} else {
 						c.splice(0, 1);
