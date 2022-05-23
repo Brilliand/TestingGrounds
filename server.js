@@ -1235,6 +1235,19 @@ io.on('connection', function (socket, req) {
 							}
 							players[mod].s.sendMessage(Type.TOGGLE, player.name, chat, player.blackmailed);
 							break;
+						case 'deafen':
+							player.deafened = state;
+							if (!players[socket.id].silenced) {
+								if (player.deafened) {
+									addLogMessage(Type.SYSTEM, player.name + ' is now deafened.');
+									players[mod].s.sendMessage(Type.SYSTEM, player.name + ' is now deafened.');
+								} else {
+									addLogMessage(Type.SYSTEM, player.name + ' is no longer deafened.');
+									players[mod].s.sendMessage(Type.SYSTEM, player.name + ' is no longer deafened.');
+								}
+							}
+							players[mod].s.sendMessage(Type.TOGGLE, player.name, chat, player.deafened);
+							break;
 						case 'douse':
 							player.doused = state;
 							if (!players[socket.id].silenced) {
@@ -1985,6 +1998,7 @@ function Player(socket, name, ip) {
 		afk: undefined,
 		seance: undefined,
 		blackmailed: false,
+		deafened: false,
 		doused: false,
 		hearwhispers: false,
 		votingFor: undefined,
@@ -2054,6 +2068,7 @@ function Player(socket, name, ip) {
 				gardenia: undefined,
 				seance: undefined,
 				blackmailed: false,
+				deafened: false,
 				doused: false,
 				hearwhispers: false,
 				votingFor: undefined,
@@ -3616,18 +3631,25 @@ function Player(socket, name, ip) {
 				this.s.sendMessage(Type.SYSTEM, 'You cannot whisper to the dead.');
 			} else {
 				const whisper = { from: playerToReference(this), to: playerToReference(to), msg };
-				to.s.sendMessage(Type.WHISPER, { from: whisper.from, msg });
-				this.s.sendMessage(Type.WHISPER, { to: whisper.to, msg });
-				if (phase != Phase.PREGAME) {
+				if (phase == Phase.PREGAME) {
+					to.s.sendMessage(Type.WHISPER, { from: whisper.from, msg });
+					this.s.sendMessage(Type.WHISPER, { to: whisper.to, msg });
+				} else {
 					addLogMessage(Type.WHISPER, whisper);
-					players[mod].s.sendMessage(Type.WHISPER, whisper);
 					for (i in players) {
-						if (players[i].spectate || players[i].hearwhispers) {
+						if (players[i] === this) {
+							this.s.sendMessage(Type.WHISPER, { to: whisper.to, msg });
+						} else if(players[i].deafened) {
+							// No message
+						} else if (players[i] === to) {
+							to.s.sendMessage(Type.WHISPER, { from: whisper.from, msg });
+						} else if (i === mod || players[i].spectate || players[i].hearwhispers || this.deafened) {
 							players[i].s.sendMessage(Type.WHISPER, whisper);
+						} else {
+							//Public whispering message
+							players[i].s.sendMessage(Type.WHISPER, { from: whisper.from, to: whisper.to });
 						}
 					}
-					//Public whispering message
-					sendPublicMessage(Type.WHISPER, { from: this.name, to: to.name });
 				}
 			}
 		},
